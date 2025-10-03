@@ -1,5 +1,6 @@
 # --- IMPORTS ---
 import pygame
+import pygame_menu
 
 # --- INITS ---
 pygame.init()
@@ -25,19 +26,33 @@ pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
 # --- VARIABLES ---
-game_running = True
+# Everything in the game stops if this is False...
+game_running = False
+# States - "menu": Main menu, "game": Gameplay
+current_state = "menu"
 
 # --- DEFINITIONS ---
+def start_game():
+    global game_running
+    game_running = True
+
+# Main menu setup
+MAIN_MENU = pygame_menu.Menu(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
+MAIN_MENU.add.text_input('Name: ')
+MAIN_MENU.add.button('Play', start_game)
+MAIN_MENU.add.button('Quit', pygame_menu.events.EXIT)
 
 # --- CODE BEGIN HERE ---
 
 # -- MAIN LOOP ---
+MAIN_MENU.mainloop(SCREEN)
+
 while game_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_running = False
 
-    SCREEN.fill(BLACK)
+    SCREEN.fill(WHITE)
     # Draw stuff here
 
     pygame.display.flip()
