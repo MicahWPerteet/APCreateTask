@@ -28,17 +28,42 @@ CLOCK = pygame.time.Clock()
 # --- VARIABLES ---
 # Everything in the game stops if this is False...
 game_running = False
-# States - "menu": Main menu, "game": Gameplay
+# States - "menu": Main menu, "game": Gameplay, "paused": Displays pause menu
 current_state = "menu"
 
+username = ""
+money = 0
+
 # --- DEFINITIONS ---
+def set_username(value):
+    global username
+    username = value
+
 def start_game():
     global game_running
-    game_running = True
+    global current_state
+    if not username == '':
+        game_running = True
+        current_state = "game"
+        MAIN_MENU.disable()
+    else:
+        print("Please enter your name.")
+
+def pause_game():
+    global current_state
+    global game_running
+    game_running = False
+    current_state = "paused"
+
+def toggle_main_menu():
+    if MAIN_MENU.is_enabled():
+        MAIN_MENU.disable()
+    else:
+        MAIN_MENU.enable()
 
 # Main menu setup
 MAIN_MENU = pygame_menu.Menu(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
-MAIN_MENU.add.text_input('Name: ')
+MAIN_MENU.add.text_input('Name: ', onchange=set_username)
 MAIN_MENU.add.button('Play', start_game)
 MAIN_MENU.add.button('Quit', pygame_menu.events.EXIT)
 
