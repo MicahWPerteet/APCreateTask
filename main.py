@@ -49,11 +49,20 @@ def start_game():
     else:
         print("Please enter your name.")
 
-def pause_game():
+def toggle_pause_menu():
     global current_state
     global game_running
-    game_running = False
-    current_state = "paused"
+    if current_state == "paused":
+        game_running = True
+        PAUSE_MENU.disable()
+        current_state = "game"
+        print(current_state)
+    else:
+        game_running = False
+        PAUSE_MENU.mainloop(SCREEN)
+        PAUSE_MENU.enable()
+        current_state = "paused"
+        print(current_state)
 
 def toggle_main_menu():
     if MAIN_MENU.is_enabled():
@@ -63,9 +72,16 @@ def toggle_main_menu():
 
 # Main menu setup
 MAIN_MENU = pygame_menu.Menu(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
-MAIN_MENU.add.text_input('Name: ', onchange=set_username)
-MAIN_MENU.add.button('Play', start_game)
-MAIN_MENU.add.button('Quit', pygame_menu.events.EXIT)
+MAIN_MENU.add.text_input("Name: ", onchange=set_username)
+MAIN_MENU.add.button("Play", start_game)
+MAIN_MENU.add.button("Quit", pygame_menu.events.EXIT)
+
+# Pause menu setup
+PAUSE_MENU = pygame_menu.Menu("Paused", SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
+PAUSE_MENU.add.label("Money: " + str(money))
+PAUSE_MENU.add.label("")
+PAUSE_MENU.add.button("Resume", toggle_pause_menu)
+PAUSE_MENU.add.button("Quit", pygame_menu.events.EXIT)
 
 # --- CODE BEGIN HERE ---
 
@@ -76,6 +92,10 @@ while game_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                toggle_pause_menu()
+                print(current_state)
 
     SCREEN.fill(WHITE)
     # Draw stuff here
