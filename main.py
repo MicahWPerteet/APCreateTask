@@ -112,7 +112,7 @@ pygame.quit()
 
 # Gambling shenanganery, Will inplement once chances are done
 
-
+'''
 icons = ["7", "bell", "clover", "cherry", "triple bar", "double bar", "bar"]
 num1= None
 num2= None
@@ -166,3 +166,4 @@ def roll():
 
 for i in range(5):
     roll()
+'''
