@@ -25,16 +25,30 @@ SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 500
 SCREEN_TITLE = "Gamba Game"
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
+CENTER = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 
 FPS = 60
-
 SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
-# Creates background surface
-BACKGROUND = pygame.Surface(SCREEN.get_size())
-BACKGROUND = BACKGROUND.convert()
+LEVER_ANIM_FRAMES = [
+    pygame.image.load(f"lever_frame_{i}.gif" for i in range(1, 6)).convert_alpha()
+]
+LEVER_ANIM_FRAME_RATE = 10 # 5 frame animation takes .5 seconds
+
+class lever(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = LEVER_ANIM_FRAMES[0]
+        self.rect = self.image.get_rect()
+        self.rect.center(x, y)
+        
+
+    def play_animation(self):
+        # play downward pull animation
+        for frame in LEVER_ANIM_FRAMES:
+            self.image = frame
 
 # --- VARIABLES ---
 # States - "menu": Main menu, "game": Gameplay, "paused": Displays pause menu
@@ -45,6 +59,8 @@ resume_requested = False
 username = ""
 money = 0
 
+spinning = False
+
 # --- DEFINITIONS ---
 def set_username(input):
     global username
@@ -53,7 +69,6 @@ def set_username(input):
 def update_money(modifier):
     global money
     money += modifier
-
 
 def start_game():
     global current_state
@@ -94,14 +109,20 @@ PAUSE_MENU.add.button("Quit", pygame_menu.events.EXIT)
 MAIN_MENU.mainloop(SCREEN)
 
 while True:
+    # event handling
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        
+        # all events that are triggered by a keydown go here
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p and current_state == "game":
                 pause_game()
+        
+        # all events that are triggered by a mousebuttondown go here
+        #elif event.type == pygame.MOUSEBUTTONDOWN:
 
     if current_state == "game":
         SCREEN.fill(WHITE)
@@ -141,7 +162,6 @@ bar3 = 1.2
 cherry = 1.6
 clover = 2
 bell = 2.4
-
 
 def spin():
     global num1, num2, num3

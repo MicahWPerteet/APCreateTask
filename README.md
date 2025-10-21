@@ -29,6 +29,12 @@ Found a library for creating menus with pygame, setup a basic main menu and paus
 
 **Day 3:**  
 Finished making the functional main menu and pause menu, started blocking out the main game screen layout, and began creating the art for the slot machine.
+ 
+**Day 4:**
+No work was done on this day.
+
+**Day 5:**
+
 
 ---
 
