@@ -41,14 +41,28 @@ SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
+# load icon images
 SLOT_ICON_IMAGES = [
     pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
     for i in range(1, 4)
 ]
+# class setup for icons
+class icon(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = rand.choice(SLOT_ICON_IMAGES)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+# create a sprite group and populate it with three icons
+icons = pygame.sprite.Group()
+for i in range(3):
+    icons.add(icon((i * 100 + CENTER[0]) - 100, CENTER[1]))
 
 '''
 LEVER_ANIM_FRAMES = [
-    pygame.image.load(f"lever_frame_{i}.gif" for i in range(1, 6)).convert_alpha()
+    pygame.image.load(f"lever_frame_{i}.gif").convert_alpha()
+    for i in range(1, 6)
 ]
 
 LEVER_ANIM_FRAME_RATE = 10 # 5 frame animation takes .5 seconds
@@ -147,7 +161,8 @@ while True:
         money_text = FONT.render("Money: " + str(money), True, BLACK)
         # renders money text
         SCREEN.blit(money_text, MONEY_TEXT_POSITION)
-        
+        icons.draw(SCREEN)
+
         pygame.display.flip()
 
     elif current_state == "paused":
