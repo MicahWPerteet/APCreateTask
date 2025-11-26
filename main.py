@@ -28,6 +28,14 @@ SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 FPS = 60
 
+# Text setup
+FONT_SIZE = 30
+FONT = pygame.font.Font(None, FONT_SIZE)
+
+TEXT_X_MARGIN = 5
+TEXT_Y_MARGIN = 5
+MONEY_TEXT_POSITION = (TEXT_X_MARGIN, TEXT_Y_MARGIN)
+
 SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
@@ -54,7 +62,6 @@ def update_money(modifier):
     global money
     money += modifier
 
-
 def start_game():
     global current_state
     if not username == '':
@@ -68,11 +75,18 @@ def pause_game():
     if not PAUSE_MENU.is_enabled():
         PAUSE_MENU.enable()
     global current_state
+    PAUSE_MENU_MONEY_LABEL.set_title("Money: " + str(money))
     current_state = "paused"
 
 def resume_game():
     global resume_requested
     resume_requested = True
+
+class Lever(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = 
 
 # Main menu setup
 MAIN_MENU = pygame_menu.Menu(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
@@ -82,13 +96,13 @@ MAIN_MENU.add.button("Quit", pygame_menu.events.EXIT)
 
 # Pause menu setup
 PAUSE_MENU = pygame_menu.Menu("Paused", SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
-PAUSE_MENU.add.label("Money: " + str(money))
-PAUSE_MENU.add.label("")
+PAUSE_MENU.add.label("Money: " + str(money), label_id="pause_money_label")
+PAUSE_MENU_MONEY_LABEL = PAUSE_MENU.get_widget("pause_money_label")
+PAUSE_MENU.add.label("") # blank label for spacing (do not remove)
 PAUSE_MENU.add.button("Resume", resume_game)
 PAUSE_MENU.add.button("Quit", pygame_menu.events.EXIT)
 
 # --- CODE BEGIN HERE ---
-
 # --- MAIN LOOP ---
 # starts the main loop for the main menu
 MAIN_MENU.mainloop(SCREEN)
@@ -96,18 +110,25 @@ MAIN_MENU.mainloop(SCREEN)
 while True:
     events = pygame.event.get()
     for event in events:
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT: # quit button functionality
             pygame.quit()
             exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p and current_state == "game":
-                pause_game()
+
+        elif event.type == pygame.KEYDOWN: # keypress event checker
+            if current_state == "game":
+                if event.key == pygame.K_p:
+                    pause_game()
+                if event.key == pygame.K_m:
+                    money += 10
 
     if current_state == "game":
-        SCREEN.fill(WHITE)
+        SCREEN.fill(BG_GRAY)
+
+        # update money text
+        money_text = FONT.render("Money: " + str(money), True, BLACK)
+        # renders money text
+        SCREEN.blit(money_text, MONEY_TEXT_POSITION)
         
-
-
         pygame.display.flip()
 
     elif current_state == "paused":
