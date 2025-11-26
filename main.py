@@ -41,9 +41,16 @@ SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
+SLOT_ICON_IMAGES = [
+    pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
+    for i in range(1, 4)
+]
+
+'''
 LEVER_ANIM_FRAMES = [
     pygame.image.load(f"lever_frame_{i}.gif" for i in range(1, 6)).convert_alpha()
 ]
+
 LEVER_ANIM_FRAME_RATE = 10 # 5 frame animation takes .5 seconds
 
 class lever(pygame.sprite.Sprite):
@@ -53,11 +60,11 @@ class lever(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center(x, y)
         
-
     def play_animation(self):
         # play downward pull animation
         for frame in LEVER_ANIM_FRAMES:
             self.image = frame
+'''
 
 # --- VARIABLES ---
 # States - "menu": Main menu, "game": Gameplay, "paused": Displays pause menu
@@ -98,12 +105,6 @@ def pause_game():
 def resume_game():
     global resume_requested
     resume_requested = True
-
-class Lever(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.image = 
 
 # Main menu setup
 MAIN_MENU = pygame_menu.Menu(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
