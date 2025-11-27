@@ -30,13 +30,43 @@ SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 CENTER = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 
 FPS = 60
+
+# Text setup
+FONT_SIZE = 30
+FONT = pygame.font.Font(None, FONT_SIZE)
+
+TEXT_X_MARGIN = 5
+TEXT_Y_MARGIN = 5
+MONEY_TEXT_POSITION = (TEXT_X_MARGIN, TEXT_Y_MARGIN)
+
 SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
-LEVER_ANIM_FRAMES = [
-    pygame.image.load(f"lever_frame_{i}.gif" for i in range(1, 6)).convert_alpha()
+# load icon images
+SLOT_ICON_IMAGES = [
+    pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
+    for i in range(1, 4)
 ]
+# class setup for icons
+class icon(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = rand.choice(SLOT_ICON_IMAGES)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+# create a sprite group and populate it with three icons
+icons = pygame.sprite.Group()
+for i in range(3):
+    icons.add(icon((i * 100 + CENTER[0]) - 100, CENTER[1]))
+
+'''
+LEVER_ANIM_FRAMES = [
+    pygame.image.load(f"lever_frame_{i}.gif").convert_alpha()
+    for i in range(1, 6)
+]
+
 LEVER_ANIM_FRAME_RATE = 10 # 5 frame animation takes .5 seconds
 
 class lever(pygame.sprite.Sprite):
@@ -46,11 +76,11 @@ class lever(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center(x, y)
         
-
     def play_animation(self):
         # play downward pull animation
         for frame in LEVER_ANIM_FRAMES:
             self.image = frame
+'''
 
 # --- VARIABLES ---
 # States - "menu": Main menu, "game": Gameplay, "paused": Displays pause menu
@@ -85,6 +115,7 @@ def pause_game():
     if not PAUSE_MENU.is_enabled():
         PAUSE_MENU.enable()
     global current_state
+    PAUSE_MENU_MONEY_LABEL.set_title("Money: " + str(money))
     current_state = "paused"
 
 def resume_game():
@@ -99,13 +130,13 @@ MAIN_MENU.add.button("Quit", pygame_menu.events.EXIT)
 
 # Pause menu setup
 PAUSE_MENU = pygame_menu.Menu("Paused", SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
-PAUSE_MENU.add.label("Money: " + str(money))
-PAUSE_MENU.add.label("")
+PAUSE_MENU.add.label("Money: " + str(money), label_id="pause_money_label")
+PAUSE_MENU_MONEY_LABEL = PAUSE_MENU.get_widget("pause_money_label")
+PAUSE_MENU.add.label("") # blank label for spacing (do not remove)
 PAUSE_MENU.add.button("Resume", resume_game)
 PAUSE_MENU.add.button("Quit", pygame_menu.events.EXIT)
 
 # --- CODE BEGIN HERE ---
-
 # --- MAIN LOOP ---
 # starts the main loop for the main menu
 MAIN_MENU.mainloop(SCREEN)
@@ -114,22 +145,25 @@ while True:
     # event handling
     events = pygame.event.get()
     for event in events:
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT: # quit button functionality
             pygame.quit()
             exit()
-        
-        # all events that are triggered by a keydown go here
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p and current_state == "game":
-                pause_game()
-        
-        # all events that are triggered by a mousebuttondown go here
-        #elif event.type == pygame.MOUSEBUTTONDOWN:
+
+        elif event.type == pygame.KEYDOWN: # keypress event checker
+            if current_state == "game":
+                if event.key == pygame.K_p:
+                    pause_game()
+                if event.key == pygame.K_m:
+                    money += 10
 
     if current_state == "game":
-        SCREEN.fill(WHITE)
-        
+        SCREEN.fill(BG_GRAY)
 
+        # update money text
+        money_text = FONT.render("Money: " + str(money), True, BLACK)
+        # renders money text
+        SCREEN.blit(money_text, MONEY_TEXT_POSITION)
+        icons.draw(SCREEN)
 
         pygame.display.flip()
 
