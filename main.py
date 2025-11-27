@@ -4,6 +4,8 @@ import pygame_menu
 import random as rand
 import numpy as np
 
+# '''
+
 # import test
 if not pygame.font:
     print("Warning: fonts disabled")
@@ -146,12 +148,15 @@ while True:
     CLOCK.tick(FPS)
 
 # Gambling shenanganery, Will inplement once chances are done
-
+# TODO Get chances working
 '''
 icons = ["7", "bell", "clover", "cherry", "triple bar", "double bar", "bar"]
 num1= None
 num2= None
 num3= None
+
+nums = []
+output = []
 
 mean = 0
 std_dev = 1
@@ -164,40 +169,63 @@ clover = 2
 bell = 2.4
 
 def spin():
-    global num1, num2, num3
-    num1 = np.random.normal(loc=mean, scale=std_dev)
-    num2 = np.random.normal(loc=mean, scale=std_dev)
-    num3 = np.random.normal(loc=mean, scale=std_dev)
+    global nums
+    nums = []
+    for n in range(3):
+        nums.append(np.random.normal(loc=mean, scale=std_dev))
 def rank(num):
+    global output
     if abs(num) <= bar:
-        num = icons[6]
+        new_icon = (icons[6])
     elif abs(num) <= bar2:
-        num = icons[5]
+        new_icon = (icons[5])
     elif abs(num) <= bar3:
-        num = icons[4]
+        new_icon = (icons[4])
     elif abs(num) <= cherry:
-        num = icons[3]
+        new_icon = (icons[3])
     elif abs(num) <= clover:
-        num = icons[2]
+        new_icon = (icons[2])
     elif abs(num) <= bell:
-        num = icons[1]
+        new_icon = (icons[1])
     else:
-        num = icons[0]    
-    return(num)
+        new_icon = (icons[0])   
+    return(new_icon)
 def roll():
-    global num1, num2, num3, icons
+    global nums, icons, output
+    output = []
+    multi = .7
     spin()
-    num1 = rank(num1)
-    num2 = rank(num2)
-    num3 = rank(num3)
+    for i in range(3):
+        output.append(rank(nums[i]))
     print("rolling...")
-    output = [num1, num2, num3]
     print(output)
+    print(nums[0],nums[1],nums[2])
     if output[0] == output[1] and output[1] == output [2]:
-        print("Full", num2, "straight")
+        multi = nums[1]*3
+        print("Full", output[1], "straight")
     elif output[0] == output[1] or output[1] == output[2]: 
-        print(num2, "straight")
+        multi = nums[1]*2
+        print(output[1], "straight")
+    return(abs(multi))
+    
+rollagain= True
+while rollagain == True:
+    bet = 100 # float(input("How much money do you want to bet? ->"))
+    total = bet
+    rolls = 1 # int(input("How many times would you like to roll? ->"))
+    hhh = (input("->")) # placeholder variable to change the final multiplie. Current idea: .3
 
-for i in range(5):
-    roll()
+    for r in range(rolls):
+        multi = roll()
+        total = multi*total
+        earn = total - bet
+
+    print("ammount changed", round(earn))
+    cash = bet+earn
+    print("You made", round(cash, 2))
+    # rollagain = input("Roll again? ->")
+    # if rollagain == "y":
+    #     rollagain = True
+    # else:
+    #     rollagain = False
 '''
