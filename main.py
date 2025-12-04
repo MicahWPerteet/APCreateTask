@@ -3,6 +3,7 @@ import pygame
 import pygame_menu
 import random as rand
 import numpy as np
+import time
 
 # import test
 if not pygame.font:
@@ -32,15 +33,15 @@ SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
-LEVER_ANIM_FRAMES = [
-    pygame.image.load(f"lever_frame_{i}.gif" for i in range(1, 6)).convert_alpha()
-]
+#LEVER_ANIM_FRAMES = [
+#    pygame.image.load(f"lever_frame_{i}.gif" for i in range(1, 6)).convert_alpha()
+#]
 LEVER_ANIM_FRAME_RATE = 10 # 5 frame animation takes .5 seconds
 
 class lever(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = LEVER_ANIM_FRAMES[0]
+#        self.image = LEVER_ANIM_FRAMES[0]
         self.rect = self.image.get_rect()
         self.rect.center(x, y)
         
@@ -49,6 +50,7 @@ class lever(pygame.sprite.Sprite):
         # play downward pull animation
         for frame in LEVER_ANIM_FRAMES:
             self.image = frame
+            time.sleep
 
 # --- VARIABLES ---
 # States - "menu": Main menu, "game": Gameplay, "paused": Displays pause menu
@@ -127,7 +129,7 @@ while True:
     if current_state == "game":
         SCREEN.fill(WHITE)
         
-
+        
 
         pygame.display.flip()
 
