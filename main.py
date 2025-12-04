@@ -26,7 +26,6 @@ SCREEN_HEIGHT = 500
 SCREEN_TITLE = "Gamba Game"
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 CENTER = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
-
 FPS = 60
 
 # Text setup
@@ -41,44 +40,87 @@ SCREEN = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(SCREEN_TITLE)
 CLOCK = pygame.time.Clock()
 
+# list to hold ids for unique ids
+UNIQUE_EVENT_IDS = []
+
+TIMED_TEXT_OBJECTS = []
+
+def generate_event_id():
+    global UNIQUE_EVENT_IDS
+    id = 1
+    while id in UNIQUE_EVENT_IDS:
+        id += 1
+    UNIQUE_EVENT_IDS.append(id)
+    return pygame.USEREVENT + id
+
 # load icon images
 SLOT_ICON_IMAGES = [
     pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
-    for i in range(1, 4)
+    for i in range(1, 5)
 ]
 # class setup for icons
 class icon(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.image = rand.choice(SLOT_ICON_IMAGES)
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()   
         self.rect.center = (x, y)
 
-# create a sprite group and populate it with three icons
-icons = pygame.sprite.Group()
-for i in range(3):
-    icons.add(icon((i * 100 + CENTER[0]) - 100, CENTER[1]))
+    def choose_random_image(self):
+        self.image = rand.choice(SLOT_ICON_IMAGES)
 
-'''
+# custom userevent for icon switching
+ICON_SWITCH_EVENT = generate_event_id()
+# timer setup for icon switching event
+pygame.time.set_timer(ICON_SWITCH_EVENT, 1000)
+
+# create a sprite group and populate it with three icons
+ICONS_GROUP = pygame.sprite.Group()
+for i in range(3):
+    ICONS_GROUP.add(icon((i * 100 + CENTER[0]) - 100, CENTER[1]))
+    
 LEVER_ANIM_FRAMES = [
-    pygame.image.load(f"lever_frame_{i}.gif").convert_alpha()
-    for i in range(1, 6)
+    *[pygame.image.load(f"images/lever_{i}.gif").convert_alpha()
+    for i in range(1, 7)],
 ]
 
-LEVER_ANIM_FRAME_RATE = 10 # 5 frame animation takes .5 seconds
+LEVER_ANIM_FRAME_GAP = 3 # 6 frame animation takes .5 seconds --- 6 frames = 5 image changes * 3 frames per image change = 15 frames / FPS (60) = .25 seconds
+# custom userevent for the lever animation
+LEVER_ANIM_EVENT = generate_event_id()
+#pygame.time.set_timer(LEVER_ANIM_EVENT, (10 * FPS // (LEVER_ANIM_FRAME_GAP * 4)))
+pygame.time.set_timer(LEVER_ANIM_EVENT, 50)
 
 class lever(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = LEVER_ANIM_FRAMES[0]
+        self.current_frame = 0
+        self.cycled = True
+        self.image = LEVER_ANIM_FRAMES[self.current_frame]
+        self.direction = "down"
         self.rect = self.image.get_rect()
-        self.rect.center(x, y)
+        self.rect.center = (x, y)
         
-    def play_animation(self):
+    def step_animation(self):
+        global spinning
         # play downward pull animation
-        for frame in LEVER_ANIM_FRAMES:
-            self.image = frame
-'''
+        if self.direction == "down" and not self.current_frame == 5:
+            self.current_frame += 1
+            self.image = LEVER_ANIM_FRAMES[self.current_frame]
+        # play upward pull animation
+        elif self.direction == "up" and not self.current_frame == 0:
+            self.current_frame -= 1
+            self.image = LEVER_ANIM_FRAMES[self.current_frame]
+        # switch direction once the animation reaches the last frame
+        if self.current_frame == 5:
+            self.direction = "up"
+        elif self.current_frame == 0 and self.cycled == False:
+            self.direction = "down"
+            self.cycled = True
+            spinning = False
+
+LEVER_GROUP = pygame.sprite.Group()
+LEVER_GROUP.add(lever(CENTER[0] + 200, CENTER[1]))
+LEVER = LEVER_GROUP.sprites()
 
 # --- VARIABLES ---
 # States - "menu": Main menu, "game": Gameplay, "paused": Displays pause menu
@@ -88,8 +130,10 @@ resume_requested = False
 
 username = ""
 money = 0
+bet_amount = 10
 
 spinning = False
+no_money_timedtext_visable = False
 
 # --- DEFINITIONS ---
 def set_username(input):
@@ -119,6 +163,21 @@ def pause_game():
 def resume_game():
     global resume_requested
     resume_requested = True
+
+class TimedText:
+    def __init__(self, text, size, color, time, location):
+        self.visable = True
+        self.id = generate_event_id()
+        self.font = pygame.font.Font(None, size)
+        self.text = text
+        self.display_text = self.font.render(text, True, color)
+        pygame.time.set_timer(self.id, (time * 1000), loops=1)
+        self.location = location
+        TIMED_TEXT_OBJECTS.append(self)
+    
+    def draw(self):
+            if self.visable:
+                SCREEN.blit(self.display_text, self.location)
 
 # Main menu setup
 MAIN_MENU = pygame_menu.Menu(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, theme=pygame_menu.themes.THEME_BLUE)
@@ -154,6 +213,37 @@ while True:
                 if event.key == pygame.K_m:
                     money += 10
 
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = event.pos
+            print("Clicked", mouse_pos)
+            if LEVER[0].rect.collidepoint(mouse_pos) and current_state == "game" and not spinning:
+                if money - bet_amount < 0:
+                    if not no_money_timedtext_visable:
+                        no_money_timedtext_visable = True
+                        text = "Not enough money!"
+                        width = FONT.size(text)[0]
+                        TimedText(text, FONT_SIZE * 2, RED, 2, (CENTER[0] - width, CENTER[1] + 100))
+                else:
+                    money -= bet_amount
+                    print("Clicked Lever")
+                    spinning = True
+                    LEVER[0].cycled = False
+            
+        elif event.type == ICON_SWITCH_EVENT:
+            for i in ICONS_GROUP:
+                i.choose_random_image()
+
+        elif event.type == LEVER_ANIM_EVENT and not LEVER[0].cycled:
+            LEVER[0].step_animation()
+        
+        elif TIMED_TEXT_OBJECTS is not []:
+            for timedtext in TIMED_TEXT_OBJECTS:
+                if event.type == timedtext.id:
+                    timedtext.visable = False
+                    TIMED_TEXT_OBJECTS.remove(timedtext)
+                    if timedtext.text == "Not enough money!":
+                        no_money_timedtext_visable = False
+
     if current_state == "game":
         SCREEN.fill(BG_GRAY)
 
@@ -161,7 +251,12 @@ while True:
         money_text = FONT.render("Money: " + str(money), True, BLACK)
         # renders money text
         SCREEN.blit(money_text, MONEY_TEXT_POSITION)
-        icons.draw(SCREEN)
+        ICONS_GROUP.draw(SCREEN)
+        LEVER_GROUP.draw(SCREEN)
+
+        if TIMED_TEXT_OBJECTS is not []:
+            for timedtext in TIMED_TEXT_OBJECTS:
+                timedtext.draw()
 
         pygame.display.flip()
 
