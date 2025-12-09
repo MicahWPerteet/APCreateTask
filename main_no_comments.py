@@ -58,7 +58,6 @@ SLOT_ICON_IMAGES = [
     pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
     for i in range(1, 5)
 ]
-SLOT_BASE_IMAGE = pygame.image.load("images/slot_base.gif").convert_alpha()
 # class setup for icons
 class icon(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -69,15 +68,6 @@ class icon(pygame.sprite.Sprite):
 
     def choose_random_image(self):
         self.image = rand.choice(SLOT_ICON_IMAGES)
-
-class slot_base(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = SLOT_BASE_IMAGE
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-SLOT_BASE_GROUP = pygame.sprite.Group()
-SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 
 # custom userevent for icon switching
 ICON_SWITCH_EVENT = generate_event_id()
@@ -91,11 +81,13 @@ for i in range(3):
     
 LEVER_ANIM_FRAMES = [
     *[pygame.image.load(f"images/lever_{i}.gif").convert_alpha()
-    for i in range(1, 7)]
+    for i in range(1, 7)],
 ]
 
+LEVER_ANIM_FRAME_GAP = 3 # 6 frame animation takes .5 seconds --- 6 frames = 5 image changes * 3 frames per image change = 15 frames / FPS (60) = .25 seconds
 # custom userevent for the lever animation
 LEVER_ANIM_EVENT = generate_event_id()
+#pygame.time.set_timer(LEVER_ANIM_EVENT, (10 * FPS // (LEVER_ANIM_FRAME_GAP * 4)))
 pygame.time.set_timer(LEVER_ANIM_EVENT, 50)
 
 class lever(pygame.sprite.Sprite):
@@ -127,7 +119,7 @@ class lever(pygame.sprite.Sprite):
             spinning = False
 
 LEVER_GROUP = pygame.sprite.Group()
-LEVER_GROUP.add(lever(CENTER[0] + 165, CENTER[1]))
+LEVER_GROUP.add(lever(CENTER[0] + 200, CENTER[1]))
 LEVER = LEVER_GROUP.sprites()
 
 # --- VARIABLES ---
@@ -267,7 +259,6 @@ while True:
         SCREEN.blit(money_text, MONEY_TEXT_POSITION)
         ICONS_GROUP.draw(SCREEN)
         LEVER_GROUP.draw(SCREEN)
-        SLOT_BASE_GROUP.draw(SCREEN)
 
         if TIMED_TEXT_OBJECTS is not []:
             for timedtext in TIMED_TEXT_OBJECTS:
