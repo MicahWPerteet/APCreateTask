@@ -182,25 +182,26 @@ while True:
     CLOCK.tick(FPS)
 
 # Gambling shenanganery, Will inplement once chances are done
-# TODO Get chances working
+# TODO Get chances perfectt
 '''
-icons = ["7", "bell", "clover", "cherry", "triple bar", "double bar", "bar"]
+icons = ["7", "diamond", "bell", "horseshoe", "clover", "cherry", "triple bar", "double bar", "bar"]
 num1= None
 num2= None
 num3= None
 
 nums = []
-output = []
 
 mean = 0
 std_dev = 1
 
-bar = .4
-bar2 = .8
-bar3 = 1.2
-cherry = 1.6
-clover = 2
-bell = 2.4
+bar = .3
+bar2 = .6
+bar3 = .9
+cherry = 1.2
+clover = 1.5
+horseshoe = 1.8
+bell = 2.1
+diamond =2.4
 
 def spin():
     global nums
@@ -208,24 +209,27 @@ def spin():
     for n in range(3):
         nums.append(np.random.normal(loc=mean, scale=std_dev))
 def rank(num):
-    global output
     if abs(num) <= bar:
-        new_icon = (icons[6])
+        new_icon = (icons[8])
     elif abs(num) <= bar2:
-        new_icon = (icons[5])
+        new_icon = (icons[7])
     elif abs(num) <= bar3:
-        new_icon = (icons[4])
+        new_icon = (icons[6])
     elif abs(num) <= cherry:
-        new_icon = (icons[3])
+        new_icon = (icons[5])
     elif abs(num) <= clover:
-        new_icon = (icons[2])
+        new_icon = (icons[4])
+    elif abs(num) <= horseshoe:
+        new_icon = (icons[3])
     elif abs(num) <= bell:
+        new_icon = (icons[2])
+    elif abs(num) <= diamond:
         new_icon = (icons[1])
     else:
         new_icon = (icons[0])   
     return(new_icon)
-def roll():
-    global nums, icons, output
+def roll(money):
+    global nums
     output = []
     multi = .7
     spin()
@@ -240,26 +244,24 @@ def roll():
     elif output[0] == output[1] or output[1] == output[2]: 
         multi = nums[1]*2
         print(output[1], "straight")
-    return(abs(multi))
-    
+    final = money
+    final = abs(multi)*final
+    return(final)
+
+bet = 100
 rollagain= True
 while rollagain == True:
-    bet = 100 # float(input("How much money do you want to bet? ->"))
-    total = bet
+    # bet = 100 # float(input("How much money do you want to bet? ->"))
     rolls = 1 # int(input("How many times would you like to roll? ->"))
-    hhh = (input("->")) # placeholder variable to change the final multiplie. Current idea: .3
+    hhh = (input("->")) 
 
     for r in range(rolls):
-        multi = roll()
-        total = multi*total
-        earn = total - bet
-
-    print("ammount changed", round(earn))
-    cash = bet+earn
-    print("You made", round(cash, 2))
+        bet = roll(bet)
+    print("Current Balence", round(bet, 2))
     # rollagain = input("Roll again? ->")
     # if rollagain == "y":
     #     rollagain = True
     # else:
     #     rollagain = False
+
 '''
