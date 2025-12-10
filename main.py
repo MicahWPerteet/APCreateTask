@@ -55,10 +55,19 @@ def generate_event_id():
 
 # load icon images
 SLOT_ICON_IMAGES = [
-    pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
-    for i in range(1, 5)
+    pygame.image.load("images/icons/cherry.png").convert_alpha(),
+    pygame.image.load("images/icons/seven.png").convert_alpha(),
+    pygame.image.load("images/icons/clover.png").convert_alpha(),
+    pygame.image.load("images/icons/bell.png").convert_alpha(),
+    pygame.image.load("images/icons/single_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/double_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/triple_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/diamond.png").convert_alpha(),
+    pygame.image.load("images/icons/horseshoe.png").convert_alpha()
 ]
+
 SLOT_BASE_IMAGE = pygame.image.load("images/slot_base.gif").convert_alpha()
+SLOT_BASE_IMAGE = pygame.transform.scale_by(SLOT_BASE_IMAGE, (1.5, 1.2))
 # class setup for icons
 class icon(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -76,6 +85,7 @@ class slot_base(pygame.sprite.Sprite):
         self.image = SLOT_BASE_IMAGE
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+
 SLOT_BASE_GROUP = pygame.sprite.Group()
 SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 
@@ -265,9 +275,9 @@ while True:
         money_text = FONT.render("Money: " + str(money), True, BLACK)
         # renders money text
         SCREEN.blit(money_text, MONEY_TEXT_POSITION)
+        SLOT_BASE_GROUP.draw(SCREEN)
         ICONS_GROUP.draw(SCREEN)
         LEVER_GROUP.draw(SCREEN)
-        SLOT_BASE_GROUP.draw(SCREEN)
 
         if TIMED_TEXT_OBJECTS is not []:
             for timedtext in TIMED_TEXT_OBJECTS:
