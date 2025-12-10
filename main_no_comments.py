@@ -58,7 +58,6 @@ SLOT_ICON_IMAGES = [
     pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
     for i in range(1, 5)
 ]
-SLOT_BASE_IMAGE = pygame.image.load("images/slot_base.gif").convert_alpha()
 # class setup for icons
 class icon(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -69,15 +68,6 @@ class icon(pygame.sprite.Sprite):
 
     def choose_random_image(self):
         self.image = rand.choice(SLOT_ICON_IMAGES)
-
-class slot_base(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = SLOT_BASE_IMAGE
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-SLOT_BASE_GROUP = pygame.sprite.Group()
-SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 
 # custom userevent for icon switching
 ICON_SWITCH_EVENT = generate_event_id()
@@ -91,11 +81,13 @@ for i in range(3):
     
 LEVER_ANIM_FRAMES = [
     *[pygame.image.load(f"images/lever_{i}.gif").convert_alpha()
-    for i in range(1, 7)]
+    for i in range(1, 7)],
 ]
 
+LEVER_ANIM_FRAME_GAP = 3 # 6 frame animation takes .5 seconds --- 6 frames = 5 image changes * 3 frames per image change = 15 frames / FPS (60) = .25 seconds
 # custom userevent for the lever animation
 LEVER_ANIM_EVENT = generate_event_id()
+#pygame.time.set_timer(LEVER_ANIM_EVENT, (10 * FPS // (LEVER_ANIM_FRAME_GAP * 4)))
 pygame.time.set_timer(LEVER_ANIM_EVENT, 50)
 
 class lever(pygame.sprite.Sprite):
@@ -127,7 +119,7 @@ class lever(pygame.sprite.Sprite):
             spinning = False
 
 LEVER_GROUP = pygame.sprite.Group()
-LEVER_GROUP.add(lever(CENTER[0] + 165, CENTER[1]))
+LEVER_GROUP.add(lever(CENTER[0] + 200, CENTER[1]))
 LEVER = LEVER_GROUP.sprites()
 
 # --- VARIABLES ---
@@ -267,7 +259,6 @@ while True:
         SCREEN.blit(money_text, MONEY_TEXT_POSITION)
         ICONS_GROUP.draw(SCREEN)
         LEVER_GROUP.draw(SCREEN)
-        SLOT_BASE_GROUP.draw(SCREEN)
 
         if TIMED_TEXT_OBJECTS is not []:
             for timedtext in TIMED_TEXT_OBJECTS:
@@ -290,26 +281,25 @@ while True:
     CLOCK.tick(FPS)
 
 # Gambling shenanganery, Will inplement once chances are done
-# TODO Get chances perfectt
+# TODO Get chances working
 '''
-icons = ["7", "diamond", "bell", "horseshoe", "clover", "cherry", "triple bar", "double bar", "bar"]
+icons = ["7", "bell", "clover", "cherry", "triple bar", "double bar", "bar"]
 num1= None
 num2= None
 num3= None
 
 nums = []
+output = []
 
 mean = 0
 std_dev = 1
 
-bar = .3
-bar2 = .6
-bar3 = .9
-cherry = 1.2
-clover = 1.5
-horseshoe = 1.8
-bell = 2.1
-diamond =2.4
+bar = .4
+bar2 = .8
+bar3 = 1.2
+cherry = 1.6
+clover = 2
+bell = 2.4
 
 def spin():
     global nums
@@ -317,27 +307,24 @@ def spin():
     for n in range(3):
         nums.append(np.random.normal(loc=mean, scale=std_dev))
 def rank(num):
+    global output
     if abs(num) <= bar:
-        new_icon = (icons[8])
-    elif abs(num) <= bar2:
-        new_icon = (icons[7])
-    elif abs(num) <= bar3:
         new_icon = (icons[6])
-    elif abs(num) <= cherry:
+    elif abs(num) <= bar2:
         new_icon = (icons[5])
-    elif abs(num) <= clover:
+    elif abs(num) <= bar3:
         new_icon = (icons[4])
-    elif abs(num) <= horseshoe:
+    elif abs(num) <= cherry:
         new_icon = (icons[3])
-    elif abs(num) <= bell:
+    elif abs(num) <= clover:
         new_icon = (icons[2])
-    elif abs(num) <= diamond:
+    elif abs(num) <= bell:
         new_icon = (icons[1])
     else:
         new_icon = (icons[0])   
     return(new_icon)
-def roll(money):
-    global nums
+def roll():
+    global nums, icons, output
     output = []
     multi = .7
     spin()
@@ -352,24 +339,26 @@ def roll(money):
     elif output[0] == output[1] or output[1] == output[2]: 
         multi = nums[1]*2
         print(output[1], "straight")
-    final = money
-    final = abs(multi)*final
-    return(final)
-
-bet = 100
+    return(abs(multi))
+    
 rollagain= True
 while rollagain == True:
-    # bet = 100 # float(input("How much money do you want to bet? ->"))
+    bet = 100 # float(input("How much money do you want to bet? ->"))
+    total = bet
     rolls = 1 # int(input("How many times would you like to roll? ->"))
-    hhh = (input("->")) 
+    hhh = (input("->")) # placeholder variable to change the final multiplie. Current idea: .3
 
     for r in range(rolls):
-        bet = roll(bet)
-    print("Current Balence", round(bet, 2))
+        multi = roll()
+        total = multi*total
+        earn = total - bet
+
+    print("ammount changed", round(earn))
+    cash = bet+earn
+    print("You made", round(cash, 2))
     # rollagain = input("Roll again? ->")
     # if rollagain == "y":
     #     rollagain = True
     # else:
     #     rollagain = False
-
 '''
