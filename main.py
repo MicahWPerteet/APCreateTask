@@ -310,12 +310,14 @@ clover = 1.5
 horseshoe = 1.8
 bell = 2.1
 diamond =2.4
-
+# Gets three random numbers based on a bell curve distribution
 def spin():
     global nums
-    nums = []
-    for n in range(3):
+    nums = [] # Reset nums list
+    for n in range(3): # Get random number and appends it to the nums list.
         nums.append(np.random.normal(loc=mean, scale=std_dev))
+
+# Rank's the values in nums to get their corresponding icon
 def rank(num):
     if abs(num) <= bar:
         new_icon = (icons[8])
@@ -336,26 +338,26 @@ def rank(num):
     else:
         new_icon = (icons[0])   
     return(new_icon)
-def roll(money):
+
+def roll(money): # money is the players cash going into the roll.
     global nums
-    output = []
-    multi = .7
+    output = [] 
+    multi = .9 # inital multiplier
     spin()
-    for i in range(3):
+    for i in range(3): # Add the icons given by the rank function to the output list.
         output.append(rank(nums[i]))
     print("rolling...")
-    print(output)
-    print(nums[0],nums[1],nums[2])
-    if output[0] == output[1] and output[1] == output [2]:
-        multi = nums[1]*3
+    print(output) # Shows the output of the roll in the console
+    print(nums[0],nums[1],nums[2]) # (for debugging) shows the numerical output
+    if output[0] == output[1] and output[1] == output [2]: # checks if all three of the outputs are the same
+        multi = nums[1]*3 # Multiplier for three in a row
         print("Full", output[1], "straight")
-    elif output[0] == output[1] or output[1] == output[2]: 
-        multi = nums[1]*2
+    elif output[0] == output[1] or output[1] == output[2]: # Checks if there is two of the same icon next to each other.
+        multi = nums[1]*2 # Multiplier for 2 in a row
         print(output[1], "straight")
-    final = money
-    final = abs(multi)*final
+    final = abs(multi)*money # multiplies the inital money going in with the multiplier
     return(final)
-
+# Code for console testing: asks for the ammount to bet
 bet = 100
 rollagain= True
 while rollagain == True:
