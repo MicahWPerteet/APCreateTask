@@ -21,15 +21,15 @@ BLUE = (0, 0, 255)
 BG_GRAY = (211, 211, 211)
 
 # Window constants
-SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 500
+SCREEN_WIDTH = 1100
+SCREEN_HEIGHT = 900
 SCREEN_TITLE = "Gamba Game"
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 CENTER = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 FPS = 60
 
 # Text setup
-FONT_SIZE = 30
+FONT_SIZE = 40
 FONT = pygame.font.Font(None, FONT_SIZE)
 
 TEXT_X_MARGIN = 5
@@ -55,10 +55,19 @@ def generate_event_id():
 
 # load icon images
 SLOT_ICON_IMAGES = [
-    pygame.image.load(f"images/placeholder/slot_icon_{i}.gif").convert_alpha()
-    for i in range(1, 5)
+    pygame.image.load("images/icons/cherry.png").convert_alpha(),
+    pygame.image.load("images/icons/seven.png").convert_alpha(),
+    pygame.image.load("images/icons/clover.png").convert_alpha(),
+    pygame.image.load("images/icons/bell.png").convert_alpha(),
+    pygame.image.load("images/icons/single_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/double_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/triple_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/diamond.png").convert_alpha(),
+    pygame.image.load("images/icons/horseshoe.png").convert_alpha()
 ]
+
 SLOT_BASE_IMAGE = pygame.image.load("images/slot_base.gif").convert_alpha()
+SLOT_BASE_IMAGE = pygame.transform.scale_by(SLOT_BASE_IMAGE, (2.3, 2))
 # class setup for icons
 class icon(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -76,21 +85,22 @@ class slot_base(pygame.sprite.Sprite):
         self.image = SLOT_BASE_IMAGE
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+
 SLOT_BASE_GROUP = pygame.sprite.Group()
 SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 
 # custom userevent for icon switching
 ICON_SWITCH_EVENT = generate_event_id()
 # timer setup for icon switching event
-pygame.time.set_timer(ICON_SWITCH_EVENT, 1000)
+pygame.time.set_timer(ICON_SWITCH_EVENT, 200)
 
 # create a sprite group and populate it with three icons
 ICONS_GROUP = pygame.sprite.Group()
 for i in range(3):
-    ICONS_GROUP.add(icon((i * 100 + CENTER[0]) - 100, CENTER[1]))
+    ICONS_GROUP.add(icon((i * 135 + CENTER[0]) - 135, CENTER[1] - 220))
     
 LEVER_ANIM_FRAMES = [
-    *[pygame.image.load(f"images/lever_{i}.gif").convert_alpha()
+    *[pygame.transform.scale_by(pygame.image.load(f"images/lever_{i}.gif").convert_alpha(), 2)
     for i in range(1, 7)]
 ]
 
@@ -127,7 +137,7 @@ class lever(pygame.sprite.Sprite):
             spinning = False
 
 LEVER_GROUP = pygame.sprite.Group()
-LEVER_GROUP.add(lever(CENTER[0] + 165, CENTER[1]))
+LEVER_GROUP.add(lever(CENTER[0] + 360, CENTER[1]))
 LEVER = LEVER_GROUP.sprites()
 
 # --- VARIABLES ---
@@ -197,7 +207,7 @@ def event_handler(events):
                         no_money_timedtext_visable = True
                         text = "Not enough money!"
                         width = FONT.size(text)[0]
-                        TimedText(text, FONT_SIZE * 2, RED, 2, (CENTER[0] - width, CENTER[1] + 100))
+                        TimedText(text, FONT_SIZE * 2, BLACK, 2, (CENTER[0] - width, CENTER[1] + 200))
                 else:
                     money -= bet_amount
                     print("Clicked Lever")
@@ -265,10 +275,10 @@ while True:
         money_text = FONT.render("Money: " + str(money), True, BLACK)
         # renders money text
         SCREEN.blit(money_text, MONEY_TEXT_POSITION)
-        ICONS_GROUP.draw(SCREEN)
         LEVER_GROUP.draw(SCREEN)
         SLOT_BASE_GROUP.draw(SCREEN)
-
+        ICONS_GROUP.draw(SCREEN)
+        
         if TIMED_TEXT_OBJECTS is not []:
             for timedtext in TIMED_TEXT_OBJECTS:
                 timedtext.draw()
