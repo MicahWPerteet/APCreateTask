@@ -91,6 +91,8 @@ SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 
 # custom userevent for icon switching
 ICON_SWITCH_EVENT = generate_event_id()
+SPIN_CYCLE_EVENT = generate_event_id()
+SPIN_TIME = 2000
 # timer setup for icon switching event
 pygame.time.set_timer(ICON_SWITCH_EVENT, 200)
 
@@ -212,11 +214,18 @@ def event_handler(events):
                     money -= bet_amount
                     print("Clicked Lever")
                     spinning = True
+                    pygame.time.set_timer(SPIN_CYCLE_EVENT, SPIN_TIME, 1)
                     LEVER[0].cycled = False
             
-        elif event.type == ICON_SWITCH_EVENT:
-            for i in ICONS_GROUP:
-                i.choose_random_image()
+        elif event.type == ICON_SWITCH_EVENT and spinning:
+            for icon in ICONS_GROUP:
+                icon.choose_random_image()
+
+        elif event.type == SPIN_CYCLE_EVENT and spinning:
+            spinning = False
+            for j, icon in enumerate(ICONS_GROUP):
+                # switch each icon to it's final image as returned from Isaac's code
+                pass
 
         elif event.type == LEVER_ANIM_EVENT and not LEVER[0].cycled:
             LEVER[0].step_animation()
@@ -319,7 +328,7 @@ cherry = 1.2
 clover = 1.5
 horseshoe = 1.8
 bell = 2.1
-diamond =2.4
+diamond = 2.4
 
 def spin():
     global nums
