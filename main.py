@@ -92,7 +92,9 @@ SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 # custom userevent for icon switching
 ICON_SWITCH_EVENT = generate_event_id()
 # timer setup for icon switching event
-pygame.time.set_timer(ICON_SWITCH_EVENT, 200)
+pygame.time.set_timer(ICON_SWITCH_EVENT, 100)
+
+SLOT_CYCLE_EVENT = generate_event_id()
 
 # create a sprite group and populate it with three icons
 ICONS_GROUP = pygame.sprite.Group()
@@ -187,11 +189,11 @@ def event_handler(events):
     global no_money_timedtext_visable
     global spinning
     for event in events:
-        if event.type == pygame.QUIT: # quit button functionality
+        if event.type == pygame.QUIT:
             pygame.quit()
             exit()
 
-        elif event.type == pygame.KEYDOWN: # keypress event checker
+        elif event.type == pygame.KEYDOWN:
             if current_state == "game":
                 if event.key == pygame.K_p:
                     pause_game()
