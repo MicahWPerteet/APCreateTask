@@ -247,7 +247,7 @@ def event_handler(events):
                 if spin_icons[icon_id] is not None:
                     icon.image = SLOT_ICON_IMAGES[ICONS.index(spin_icons[icon_id])]
                 else:
-                    icon.choose_random_image()
+                    icon.image = SLOT_ICON_IMAGES[0]
                 icon_id += 1
 
         elif event.type == LEVER_ANIM_EVENT and not LEVER[0].cycled:
