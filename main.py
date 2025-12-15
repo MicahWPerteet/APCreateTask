@@ -55,16 +55,22 @@ def generate_event_id():
 
 # load icon images
 SLOT_ICON_IMAGES = [
-    pygame.image.load("images/icons/cherry.png").convert_alpha(),
     pygame.image.load("images/icons/seven.png").convert_alpha(),
-    pygame.image.load("images/icons/clover.png").convert_alpha(),
-    pygame.image.load("images/icons/bell.png").convert_alpha(),
-    pygame.image.load("images/icons/single_bar.png").convert_alpha(),
-    pygame.image.load("images/icons/double_bar.png").convert_alpha(),
-    pygame.image.load("images/icons/triple_bar.png").convert_alpha(),
     pygame.image.load("images/icons/diamond.png").convert_alpha(),
-    pygame.image.load("images/icons/horseshoe.png").convert_alpha()
+    pygame.image.load("images/icons/bell.png").convert_alpha(),
+    pygame.image.load("images/icons/horseshoe.png").convert_alpha(),
+    pygame.image.load("images/icons/clover.png").convert_alpha(),
+    pygame.image.load("images/icons/cherry.png").convert_alpha(),
+    pygame.image.load("images/icons/triple_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/double_bar.png").convert_alpha(),
+    pygame.image.load("images/icons/single_bar.png").convert_alpha()
 ]
+
+# random slot system stuff
+ICONS = ["7", "diamond", "bell", "horseshoe", "clover", "cherry", "triple bar", "double bar", "bar"]
+rand_nums = []
+mean = 0
+std_dev = 1
 
 SLOT_BASE_IMAGE = pygame.image.load("images/slot_base.gif").convert_alpha()
 SLOT_BASE_IMAGE = pygame.transform.scale_by(SLOT_BASE_IMAGE, (2.3, 2))
@@ -91,6 +97,8 @@ SLOT_BASE_GROUP.add(slot_base(CENTER[0], CENTER[1]))
 
 # custom userevent for icon switching
 ICON_SWITCH_EVENT = generate_event_id()
+SPIN_CYCLE_EVENT = generate_event_id()
+SPIN_TIME = 1500
 # timer setup for icon switching event
 pygame.time.set_timer(ICON_SWITCH_EVENT, 100)
 
@@ -136,7 +144,6 @@ class lever(pygame.sprite.Sprite):
         elif self.current_frame == 0 and self.cycled == False:
             self.direction = "down"
             self.cycled = True
-            spinning = False
 
 LEVER_GROUP = pygame.sprite.Group()
 LEVER_GROUP.add(lever(CENTER[0] + 360, CENTER[1]))
@@ -149,8 +156,10 @@ current_state = "menu"
 resume_requested = False
 
 username = ""
-money = 0
+money = 100
 bet_amount = 10
+change = 0
+spin_icons = []
 
 spinning = False
 no_money_timedtext_visable = False
@@ -188,6 +197,9 @@ def event_handler(events):
     global money
     global no_money_timedtext_visable
     global spinning
+    global change
+    global spin_icons
+
     for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -212,13 +224,31 @@ def event_handler(events):
                         TimedText(text, FONT_SIZE * 2, BLACK, 2, (CENTER[0] - width, CENTER[1] + 200))
                 else:
                     money -= bet_amount
+                    money = round(money, 2)
                     print("Clicked Lever")
+                    change, spin_icons = roll(bet_amount)
                     spinning = True
+                    pygame.time.set_timer(SPIN_CYCLE_EVENT, SPIN_TIME, loops=1)
                     LEVER[0].cycled = False
             
-        elif event.type == ICON_SWITCH_EVENT:
-            for i in ICONS_GROUP:
-                i.choose_random_image()
+        elif event.type == ICON_SWITCH_EVENT and spinning:
+            for icon in ICONS_GROUP:
+                icon.choose_random_image()
+
+        elif event.type == SPIN_CYCLE_EVENT and spinning:
+            spinning = False
+            money += change
+            money = round(money, 2)
+            change = 0
+            icon_id = 0
+            for icon in ICONS_GROUP:
+                # switch each icon to it's final image as returned from Isaac's code
+                print(spin_icons[icon_id])
+                if spin_icons[icon_id] is not None:
+                    icon.image = SLOT_ICON_IMAGES[ICONS.index(spin_icons[icon_id])]
+                else:
+                    icon.choose_random_image()
+                icon_id += 1
 
         elif event.type == LEVER_ANIM_EVENT and not LEVER[0].cycled:
             LEVER[0].step_animation()
@@ -230,6 +260,38 @@ def event_handler(events):
                     TIMED_TEXT_OBJECTS.remove(timedtext)
                     if timedtext.text == "Not enough money!":
                         no_money_timedtext_visable = False
+
+def spin():
+    global rand_nums
+    rand_nums = [] # Reset nums list
+    for n in range(3): # Get random number and appends it to the nums list.
+        rand_nums.append(np.random.normal(loc=mean, scale=std_dev))
+
+# Rank's the values in nums to get their corresponding icon
+def rank(num):
+    for i in range(9):
+        if abs(num) <= (.3*i):
+            new_icon = (ICONS[9-i])
+            return new_icon
+
+def roll(money): # money is the players cash going into the roll.
+    global rand_nums
+    multi = .7 # inital multiplier
+    output = []
+    spin()
+    for i in range(3): # Add the icons given by the rank function to the output list.
+        output.append(rank(rand_nums[i]))
+    print("rolling...")
+    print(output) # Shows the output of the roll in the console
+    print(rand_nums[0],rand_nums[1],rand_nums[2]) # (for debugging) shows the numerical output
+    if output[0] == output[1] and output[1] == output [2]: # checks if all three of the outputs are the same
+        multi += rand_nums[1]*3 # Multiplier for three in a row
+        print("Full", output[1], "straight")
+    elif output[0] == output[1] or output[1] == output[2]: # Checks if there is two of the same icon next to each other.
+        multi += rand_nums[1]*2 # Multiplier for 2 in a row
+        print(output[1], "straight")
+    final = abs(multi)*money # multiplies the inital money going in with the multiplier
+    return final, output
 
 class TimedText:
     def __init__(self, text, size, color, time, location):
@@ -300,88 +362,3 @@ while True:
                 pygame.display.flip()
     
     CLOCK.tick(FPS)
-
-# Gambling shenanganery, Will inplement once chances are done
-# TODO Get chances perfectt
-'''
-icons = ["7", "diamond", "bell", "horseshoe", "clover", "cherry", "triple bar", "double bar", "bar"]
-num1= None
-num2= None
-num3= None
-
-nums = []
-
-mean = 0
-std_dev = 1
-
-bar = .3
-bar2 = .6
-bar3 = .9
-cherry = 1.2
-clover = 1.5
-horseshoe = 1.8
-bell = 2.1
-diamond =2.4
-
-def spin():
-    global nums
-    nums = []
-    for n in range(3):
-        nums.append(np.random.normal(loc=mean, scale=std_dev))
-def rank(num):
-    if abs(num) <= bar:
-        new_icon = (icons[8])
-    elif abs(num) <= bar2:
-        new_icon = (icons[7])
-    elif abs(num) <= bar3:
-        new_icon = (icons[6])
-    elif abs(num) <= cherry:
-        new_icon = (icons[5])
-    elif abs(num) <= clover:
-        new_icon = (icons[4])
-    elif abs(num) <= horseshoe:
-        new_icon = (icons[3])
-    elif abs(num) <= bell:
-        new_icon = (icons[2])
-    elif abs(num) <= diamond:
-        new_icon = (icons[1])
-    else:
-        new_icon = (icons[0])   
-    return(new_icon)
-def roll(money):
-    global nums
-    output = []
-    multi = .7
-    spin()
-    for i in range(3):
-        output.append(rank(nums[i]))
-    print("rolling...")
-    print(output)
-    print(nums[0],nums[1],nums[2])
-    if output[0] == output[1] and output[1] == output [2]:
-        multi = nums[1]*3
-        print("Full", output[1], "straight")
-    elif output[0] == output[1] or output[1] == output[2]: 
-        multi = nums[1]*2
-        print(output[1], "straight")
-    final = money
-    final = abs(multi)*final
-    return(final)
-
-bet = 100
-rollagain= True
-while rollagain == True:
-    # bet = 100 # float(input("How much money do you want to bet? ->"))
-    rolls = 1 # int(input("How many times would you like to roll? ->"))
-    hhh = (input("->")) 
-
-    for r in range(rolls):
-        bet = roll(bet)
-    print("Current Balence", round(bet, 2))
-    # rollagain = input("Roll again? ->")
-    # if rollagain == "y":
-    #     rollagain = True
-    # else:
-    #     rollagain = False
-
-'''
